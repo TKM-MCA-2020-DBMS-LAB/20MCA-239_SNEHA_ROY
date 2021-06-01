@@ -1,0 +1,157 @@
+mysql> use organization;
+Database changed
+mysql> select *from depart;
++---------+-----------+---------+
+| dept_no | dept_name | house   |
++---------+-----------+---------+
+|       1 | PHYSICS   | gokhale |
+|       2 | BIOLOGY   | nehru   |
+|       3 | CHEMISTRY | nethaji |
+|       4 | PHYSICS   | patel   |
+|       5 | PHYSICS   | nehru   |
+|       6 | CHEMISTRY | patel   |
+|       7 | BIOLOGY   | nethaji |
+|       8 | CHEMISTRY | gokhale |
+|       9 | PHYSICS   | nehru   |
+|      10 | BIOLOGY   | patel   |
++---------+-----------+---------+
+10 rows in set (0.00 sec)
+
+mysql> select *from employe;
++--------+----------+-------------+---------+--------+-------------+-----------+
+| emp_no | emp_name | dept_course | dept_no | salary | designation | mobile_no |
++--------+----------+-------------+---------+--------+-------------+-----------+
+|    101 | ann      | b.sc        |       1 |   3000 | sd          |    908790 |
+|    102 | megha    | bca         |       2 |   7500 | hr          |     87959 |
+|    103 | gauthami | b.sc        |       3 |   3500 | ssd         |    467858 |
+|    104 | sneha    | ba          |       4 |   4500 | typist      |   7585758 |
+|    105 | manna    | b.sc        |       5 |   5000 | cio         |    867689 |
+|    106 | sophia   | ba          |       6 |   7800 | sd          |     89896 |
+|    107 | lakshmi  | b.sc        |       7 |  35000 | ssd         |      7689 |
+|    108 | albin    | bca         |       8 |  65000 | sd          |     98763 |
+|    109 | vishnu   | ba          |       9 |   2500 | intern      |     90221 |
+|    110 | akshai   | b.sc        |      10 |  45000 | sd          |     89078 |
++--------+----------+-------------+---------+--------+-------------+-----------+
+10 rows in set (0.00 sec)
+
+mysql> create view employdetail as select emp_no,emp_name,dept_name from depart,employe where dept_no = dept_no;
+ERROR 1052 (23000): Column 'dept_no' in where clause is ambiguous
+mysql> create view employdetail as select emp_no,emp_name,dept_name from depart,employe where depart.dept_no =employe.dept_no;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select *from employdetail;
++--------+----------+-----------+
+| emp_no | emp_name | dept_name |
++--------+----------+-----------+
+|    101 | ann      | PHYSICS   |
+|    102 | megha    | BIOLOGY   |
+|    103 | gauthami | CHEMISTRY |
+|    104 | sneha    | PHYSICS   |
+|    105 | manna    | PHYSICS   |
+|    106 | sophia   | CHEMISTRY |
+|    107 | lakshmi  | BIOLOGY   |
+|    108 | albin    | CHEMISTRY |
+|    109 | vishnu   | PHYSICS   |
+|    110 | akshai   | BIOLOGY   |
++--------+----------+-----------+
+10 rows in set (0.00 sec)
+
+mysql> update employdetail set emp_name = 'sarath' where emp_no = 106;
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select *from employdetail;
++--------+----------+-----------+
+| emp_no | emp_name | dept_name |
++--------+----------+-----------+
+|    101 | ann      | PHYSICS   |
+|    102 | megha    | BIOLOGY   |
+|    103 | gauthami | CHEMISTRY |
+|    104 | sneha    | PHYSICS   |
+|    105 | manna    | PHYSICS   |
+|    106 | sarath   | CHEMISTRY |
+|    107 | lakshmi  | BIOLOGY   |
+|    108 | albin    | CHEMISTRY |
+|    109 | vishnu   | PHYSICS   |
+|    110 | akshai   | BIOLOGY   |
++--------+----------+-----------+
+10 rows in set (0.00 sec)
+
+mysql> drop view employdetail;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> create table deptinf as select emp_no,dept_no,emp_name,salary,0 as totalsal from employe;
+Query OK, 10 rows affected (0.03 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> select *from deptinf;
++--------+---------+----------+--------+----------+
+| emp_no | dept_no | emp_name | salary | totalsal |
++--------+---------+----------+--------+----------+
+|    101 |       1 | ann      |   3000 |        0 |
+|    102 |       2 | megha    |   7500 |        0 |
+|    103 |       3 | gauthami |   3500 |        0 |
+|    104 |       4 | sneha    |   4500 |        0 |
+|    105 |       5 | manna    |   5000 |        0 |
+|    106 |       6 | sarath   |   7800 |        0 |
+|    107 |       7 | lakshmi  |  35000 |        0 |
+|    108 |       8 | albin    |  65000 |        0 |
+|    109 |       9 | vishnu   |   2500 |        0 |
+|    110 |      10 | akshai   |  45000 |        0 |
++--------+---------+----------+--------+----------+
+10 rows in set (0.00 sec)
+
+mysql> delimiter //
+mysql> create procedure updateSal(IN paraml int)
+    -> begin
+    -> update deptinf
+    -> set totalsal=(select sum(salary) from employe where dept_no = paraml)
+    -> where dept_no =paraml;
+    -> end;//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter ;
+mysql> call updateSal(2);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> call updateSal(10);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select *from deptinf;
++--------+---------+----------+--------+----------+
+| emp_no | dept_no | emp_name | salary | totalsal |
++--------+---------+----------+--------+----------+
+|    101 |       1 | ann      |   3000 |        0 |
+|    102 |       2 | megha    |   7500 |     7500 |
+|    103 |       3 | gauthami |   3500 |        0 |
+|    104 |       4 | sneha    |   4500 |        0 |
+|    105 |       5 | manna    |   5000 |        0 |
+|    106 |       6 | sarath   |   7800 |        0 |
+|    107 |       7 | lakshmi  |  35000 |        0 |
+|    108 |       8 | albin    |  65000 |        0 |
+|    109 |       9 | vishnu   |   2500 |        0 |
+|    110 |      10 | akshai   |  45000 |    45000 |
++--------+---------+----------+--------+----------+
+10 rows in set (0.00 sec)
+
+mysql> delimiter &&
+mysql> create procedure display()
+    -> begin
+    -> select *from deptinf where dept_no=3;
+    -> end &&
+Query OK, 0 rows affected (0.01 sec)
+
+
+mysql> delimiter ;
+mysql> call display();
++--------+---------+----------+--------+----------+
+| emp_no | dept_no | emp_name | salary | totalsal |
++--------+---------+----------+--------+----------+
+|    103 |       3 | gauthami |   3500 |        0 |
++--------+---------+----------+--------+----------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.01 sec)
+
+mysql>
+
