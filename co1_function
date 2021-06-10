@@ -1,0 +1,33 @@
+ use bank_organisation;
+Database changed
+mysql> select *from customer;
++-----+-----------+-------------+--------+------------+
+| cid | cname     | location    | sex    | dob        |
++-----+-----------+-------------+--------+------------+
+|   1 | ABHIMANYU | Kotarakara  | male   | 1981-10-02 |
+|   2 | MERIN     | kalamassery | female | 1978-04-10 |
+|   3 | ISSAC     | kanjikuzhi  | male   | 1989-06-30 |
+|   4 | AKSHAI    | poppoyii    | male   | 1999-07-02 |
+|   5 | HEMA      | mekak       | female | 1978-02-11 |
+|   6 | KABHIR    | mekil       | male   | 1989-10-10 |
+|   9 | MEGHA     | ayoor       | female | 1996-08-23 |
++-----+-----------+-------------+--------+------------+
+7 rows in set (0.00 sec)
+CREATE FUNCTION `account_count`(customer_name varchar(20)) RETURNS int
+    READS SQL DATA
+    DETERMINISTIC
+BEGIN
+declare a_count integer;
+select count(*) into a_count
+from Customer
+where Customer.cname=customer_name;
+RETURN a_count;
+END
+
+mysql> select account_count("ISSAC");
++------------------------+
+| account_count("ISSAC") |
++------------------------+
+|                      1 |
++------------------------+
+1 row in set (0.00 sec)
